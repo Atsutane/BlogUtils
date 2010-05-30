@@ -232,7 +232,9 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 			this.postTags.setText(reader.readLine().trim());
 			
 			/* Read the postText from the rest of the file.
+			 * but first clear the postText JTextArea.
 			 */
+			this.postText.setText("");
 			while (reader.ready()) {
 				this.postText.append(reader.readLine());
 			}
