@@ -236,7 +236,7 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 			 */
 			this.postText.setText("");
 			while (reader.ready()) {
-				this.postText.append(reader.readLine());
+				this.postText.append(reader.readLine()+"\n");
 			}
 			
 			reader.close();
