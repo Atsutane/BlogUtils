@@ -25,6 +25,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -36,6 +39,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class BlogPostEditor extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -6111553995031987251L;
 	
+	private LookAndFeelInfo[] installedLooks;
 	private File currentPath, currentFile;
 	private JMenuItem newPost, openPost, savePost, saveAsPost, quit;
 	private JTextArea postText;
@@ -43,7 +47,8 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 	private JButton clearTags;
 	
 	public BlogPostEditor() {
-		this.setTitle("PostEditor");
+		this.setName("BlogPostEditor");
+		this.setTitle("BlogPostEditor");
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 		this.currentPath = null;
@@ -90,8 +95,30 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 		this.quit = new JMenuItem("Quit");
 		this.quit.addActionListener(this);
 		file.add(this.quit);
+		
+		bar.add(this.generateLookAndFeelMenu("Look&Feel"));
 	}
 
+	/**
+	 * Generates a JMenu with the given name and every installed
+	 * LookAndFeel
+	 * @return the generated JMenu
+	 */
+	private JMenu generateLookAndFeelMenu(String name) {
+		JMenu lookAndFeel = new JMenu(name);
+		JMenuItem item = null;
+		
+		this.installedLooks = UIManager.getInstalledLookAndFeels();
+		
+		for (int i=0; i<installedLooks.length; i++) {
+			item = new JMenuItem(installedLooks[i].getName());
+			item.addActionListener(this);
+			lookAndFeel.add(item);
+		}
+		
+		return lookAndFeel;
+	}
+	
 	/**
 	 * This method is called by the constructor and draws the mainPanel
 	 * located in the Center of the Window.
@@ -189,6 +216,31 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 			
 		} else if (e.getSource() == this.clearTags) {
 			this.postTags.setText("");
+		} else {
+			/* This has to be one of the automatically generated
+			 * JMenuItem that are to select the Look and Feel
+			 */
+			if (e.getSource() instanceof JMenuItem) {
+				JMenuItem selectedLook = (JMenuItem) e.getSource();
+				LookAndFeelInfo look = null;
+				
+				/* Get the selected LookAndFeel
+				 */
+				for (LookAndFeelInfo t: this.installedLooks) {
+					if (selectedLook.getText().equals(t.getName())) {
+						look = t;
+					}
+				}
+				try {
+					UIManager.setLookAndFeel(look.getClassName());
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				/* Redraw the everything
+				 */
+				SwingUtilities.updateComponentTreeUI(this);
+			}
 		}
 	}
 	
