@@ -2,6 +2,7 @@ package de.freethoughts.atsutane.blogposteditor;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -44,7 +45,8 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 	private JMenuItem newPost, openPost, savePost, saveAsPost, quit;
 	private JTextArea postText;
 	private JTextField postTitle, postTags;
-	private JButton clearTags;
+	private JButton clearTags, toolbarBold, toolbarItalic, toolbarUnderline,
+		toolbarCode, toolbarURL, toolbarImage;
 	
 	public BlogPostEditor() {
 		this.setName("BlogPostEditor");
@@ -130,8 +132,10 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 		/* Draw the panels at the top containing the postTitle and postTags
 		 * from the class JTextField and the clearTags object of JButton.
 		 */
-		JPanel topPanel = new JPanel(new GridLayout(2,1));
+		JPanel topPanel = new JPanel(new GridLayout(3,1));
 		mainPanel.add(topPanel, BorderLayout.NORTH);
+		
+		topPanel.add(this.drawToolbar());
 		
 		JPanel upperTopPanel = new JPanel(new FlowLayout());
 		topPanel.add(upperTopPanel);
@@ -161,13 +165,66 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		mainPanel.add(scrollPane, BorderLayout.CENTER);
 	}
+	
+	/**
+	 * Draw the toolbar with default BBCodes
+	 * @return
+	 */
+	private JPanel drawToolbar() {
+		JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		
+		//Font usedFont = this.getFont();
+		
+		/* Add the buttons to the toolbar
+		 */
+		this.toolbarBold = new JButton("B");
+		this.toolbarBold.addActionListener(this);
+		toolbar.add(this.toolbarBold);
+		
+		this.toolbarItalic = new JButton("I");
+		this.toolbarItalic.addActionListener(this);
+		toolbar.add(this.toolbarItalic);
+		
+		this.toolbarUnderline = new JButton("U");
+		this.toolbarUnderline.addActionListener(this);
+		toolbar.add(this.toolbarUnderline);
+		
+		this.toolbarCode = new JButton("Code");
+		this.toolbarCode.addActionListener(this);
+		toolbar.add(this.toolbarCode);
+		
+		this.toolbarURL = new JButton("URL");
+		this.toolbarURL.addActionListener(this);
+		toolbar.add(this.toolbarURL);
+		
+		this.toolbarImage = new JButton("Image");
+		this.toolbarImage.addActionListener(this);
+		toolbar.add(this.toolbarImage);
+		
+		
+		return toolbar;
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		/* Used by the File Menu in order to select the File 
+		 * to save to / to load from.
+		 */
 		JFileChooser chooser = new JFileChooser(this.currentPath);
 		chooser.setFileFilter(new FileNameExtensionFilter("Textfiles", "txt"));
 		
-		if (e.getSource() == this.newPost) {
+		/* Shorten lines a bit
+		 */
+		Object source = e.getSource();
+		
+		/* Used by the buttons of the toolbar
+		 */
+		String selection = this.postText.getSelectedText();
+		if (selection == null) {
+			selection = "";
+		}
+		
+		if (source == this.newPost) {
 			/* Clean the postText, postTitle, postTags
 			 * and currentFile up. Path is kept.
 			 */
@@ -176,7 +233,7 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 			this.postTags.setText("");
 			this.currentFile = null;
 			
-		} else if (e.getSource() == this.savePost) {
+		} else if (source == this.savePost) {
 			if (this.currentFile == null) {
 				/* There was no file selected before, do so now.
 				 */
@@ -190,7 +247,7 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 				this.save();
 			}
 			
-		} else if (e.getSource() == this.saveAsPost) {
+		} else if (source == this.saveAsPost) {
 			/* show a dialog and let the user select
 			 * the file to which shall be saved to.
 			 */
@@ -201,7 +258,7 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 				this.save();
 			}
 			
-		} else if (e.getSource() == this.openPost) {
+		} else if (source == this.openPost) {
 			/* Read the title, text and tags from the choosen file
 			 */
 			int retValue = chooser.showOpenDialog(this);
@@ -211,11 +268,36 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 				this.load();
 			}
 			
-		} else if (e.getSource() == this.quit) {
+		} else if (source == this.quit) {
 			System.exit(NORMAL);
 			
-		} else if (e.getSource() == this.clearTags) {
+		} else if (source == this.clearTags) {
 			this.postTags.setText("");
+		
+		/* The BBCodes set by the toolbar Buttons follow.
+		 */
+		} else if (source == this.toolbarBold) {
+			this.postText.replaceSelection("[b]"+selection+"[/b]");
+			
+		} else if (source == this.toolbarItalic) {
+			this.postText.replaceSelection("[i]"+selection+"[/i]");
+			
+		} else if (source == this.toolbarUnderline) {
+			this.postText.replaceSelection("[u]"+selection+"[/u]");
+			
+		} else if (source == this.toolbarCode) {
+			this.postText.replaceSelection("[code]"+selection+"[/code]");
+			
+		}else if (source == this.toolbarURL) {
+			String url = JOptionPane.showInputDialog("Enter the URL:");
+			this.postText.replaceSelection("[url="+url+"]"+selection+"[/url]");
+			
+		} else if (source == this.toolbarImage) {
+			String image = JOptionPane.showInputDialog(
+					"Enter the URL of the image:");
+			this.postText.insert("[img]"+image+"[/img]",
+					this.postText.getSelectionStart());
+			
 		} else {
 			/* This has to be one of the automatically generated
 			 * JMenuItem that are to select the Look and Feel
