@@ -2,7 +2,6 @@ package de.freethoughts.atsutane.blogposteditor;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -137,14 +136,14 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 		
 		topPanel.add(this.drawToolbar());
 		
-		JPanel upperTopPanel = new JPanel(new FlowLayout());
+		JPanel upperTopPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		topPanel.add(upperTopPanel);
 		
 		upperTopPanel.add(new JLabel("Title:"));
 		this.postTitle = new JTextField(50);
 		upperTopPanel.add(this.postTitle);
 		
-		JPanel lowerTopPanel = new JPanel(new FlowLayout());
+		JPanel lowerTopPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		topPanel.add(lowerTopPanel);
 		
 		lowerTopPanel.add(new JLabel("Tags:"));
@@ -290,12 +289,18 @@ public class BlogPostEditor extends JFrame implements ActionListener {
 			
 		}else if (source == this.toolbarURL) {
 			String url = JOptionPane.showInputDialog("Enter the URL:");
-			this.postText.replaceSelection("[url="+url+"]"+selection+"[/url]");
+			if (url != null) { // not canceled so recreate the text
+				selection = "[url="+url+"]"+selection+"[/url]";
+			}
+			this.postText.replaceSelection(selection);
 			
 		} else if (source == this.toolbarImage) {
 			String image = JOptionPane.showInputDialog(
 					"Enter the URL of the image:");
-			this.postText.insert("[img]"+image+"[/img]",
+			if (image != null) {
+				selection = "[img]"+image+"[/img]";
+			}
+			this.postText.insert(selection,
 					this.postText.getSelectionStart());
 			
 		} else {
